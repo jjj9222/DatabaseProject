@@ -24,7 +24,7 @@ def getQuery():
             song_listbox.insert(END, row[0])
     else:
         try:
-            query = "SELECT title from song where title like %" + song_var + "%"
+            query = "SELECT title from song where title like '%" + song_var.get() + "%'"
             cursor.execute(query)
             data = cursor.fetchall()
             for row in data:
