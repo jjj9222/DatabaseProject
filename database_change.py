@@ -14,9 +14,9 @@ cursor = connection.cursor()
 
 def getQuery():
     print(song_var.get())
-    if (song_var == ""):
+    if (song_var.get() == ""):
         pass
-    elif (song_var == "*"):
+    elif (song_var.get() == "*"):
         print("in")
         cursor.execute("""SELECT title from song""")
         data = cursor.fetchall()
