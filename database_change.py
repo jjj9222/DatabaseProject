@@ -25,6 +25,7 @@ def getSongQuery():
         for row in data:
             song_listbox.insert(END, row[0])
 
+
         #display all artists that sing songs, all albums that have songs in them
         query = "SELECT DISTINCT A.\"firstName\", A.\"lastName\" from artist A, song S, performed P where P.\"artistID\" = A.\"artistID\" AND P.id = S.id"
         cursor.execute(query)
@@ -261,16 +262,32 @@ def collectionEntry():
     #authenticate user
     if(user_var.get() != ""):
         query = "SELECT DISTINCT uid from \"user\" where username = \'" + user_var.get() + "\'"
-        print(query)
         cursor.execute(query)
-        uid = cursor.fetchall()
-        if (uid != ""):
+        user_id = cursor.fetchall()
+        if (user_id != ""):
+            print("in")
             if(song_var.get() != ""):
                 query = "SELECT DISTINCT id from song where title like '%" + song_var.get() + "%'"
                 cursor.execute(query)
                 ids = cursor.fetchall()
+                for song_id in ids:
+                    query = "SELECT collectionID from collection where \'" + str(song_id[0]) + "\' = id AND \'" + str(user_id[0][0]) + "\' = uid"
+                    cursor.execute(query)
+                    repeat = cursor.fetchall()
+                    if(len(repeat) == 0):
+                        pass
+                    else:
+                        query = "INSERT INTO collection (id, uid) VALUES (\'" + str(song_id[0]) + "\', \'" + str(user_id[0][0]) + "\')"
+                        print(query)
+                        cursor.execute(query)
+                        query = "SELECT collectionID from collection where \'" + str(song_id[0]) + "\' = id AND \'" + str(user_id[0][0]) + "\' = uid"
+                        cursor.execute(query)
+                        coll_ID = cursor.fetchall()
+                        print(coll_ID)
 
-                #query = "INSERT INTO collection (id)"
+                        #query = "INSERT INTO songCollection"
+                connection.commit()
+
     return 1
 
 
