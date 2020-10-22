@@ -256,7 +256,21 @@ def curAlbumSelect(event):
         pass
 
 
-def createEntry():
+def collectionEntry():
+
+    #authenticate user
+    if(user_var.get() != ""):
+        query = "SELECT DISTINCT uid from \"user\" where username = \'" + user_var.get() + "\'"
+        print(query)
+        cursor.execute(query)
+        uid = cursor.fetchall()
+        if (uid != ""):
+            if(song_var.get() != ""):
+                query = "SELECT DISTINCT id from song where title like '%" + song_var.get() + "%'"
+                cursor.execute(query)
+                ids = cursor.fetchall()
+
+                #query = "INSERT INTO collection (id)"
     return 1
 
 
@@ -292,18 +306,37 @@ album_listbox.bind('<<ListboxSelect>>', curAlbumSelect)
 album_listbox.grid(row=1, column=4)
 album_scoll.config(command=album_listbox.yview)
 
-collection_label = Label(window, text="Music Collection")
-collection_label.grid(row=20, column= 2)
-collection_scoll = Scrollbar(window)
-collection_scoll.grid(row=21, column=5, rowspan=10, sticky=N+S+W)
-collection_listbox = Listbox(width=160, yscrollcommand=collection_scoll.set)
+cs_label = Label(window, text="Music Collection")
+cs_label.grid(row=20, column= 0)
+cs_scoll = Scrollbar(window)
+cs_scoll.grid(row=21, column=1, rowspan=10, sticky=N+S+W)
+cs_listbox = Listbox(width=50, yscrollcommand=cs_scoll.set)
 # #collection_listbox.bind('<<ListboxSelect>>', curcollectionSelect)
-collection_listbox.grid(row=21, column=0, columnspan=5)
-collection_scoll.config(command=collection_listbox.yview)
+cs_listbox.grid(row=21, column=0)
+cs_scoll.config(command=cs_listbox.yview)
+
+ca_label = Label(window, text="Artist Collection")
+ca_label.grid(row=20, column= 2)
+ca_scoll = Scrollbar(window)
+ca_scoll.grid(row=21, column=3, rowspan=10, sticky=N+S+W)
+ca_listbox = Listbox(width=50, yscrollcommand=ca_scoll.set)
+# #collection_listbox.bind('<<ListboxSelect>>', curcollectionSelect)
+ca_listbox.grid(row=21, column=2)
+ca_scoll.config(command=ca_listbox.yview)
+
+cal_label = Label(window, text="Artist Collection")
+cal_label.grid(row=20, column= 4)
+cal_scoll = Scrollbar(window)
+cal_scoll.grid(row=21, column=5, rowspan=10, sticky=N+S+W)
+cal_listbox = Listbox(width=50, yscrollcommand=cal_scoll.set)
+# #collection_listbox.bind('<<ListboxSelect>>', curcollectionSelect)
+cal_listbox.grid(row=21, column=4)
+cal_scoll.config(command=cal_listbox.yview)
 
 song_var = StringVar()
 artist_var = StringVar()
 album_var = StringVar()
+user_var = StringVar()
 
 song_entry = Entry(window, textvariable=song_var)
 song_entry.grid(row=10)
@@ -314,6 +347,11 @@ artist_entry.grid(row=10, column=2)
 album_entry = Entry(window, textvariable=album_var)
 album_entry.grid(row=10, column=4)
 
+user_label = Label(window, text="Enter Username")
+user_label.grid(row=24, column= 2)
+user_entry = Entry(window, textvariable=user_var)
+user_entry.grid(row=25, column=2)
+
 song_button = Button(window, text="Search", command=getSongQuery)
 song_button.grid(row=15)
 
@@ -323,8 +361,9 @@ artist_button.grid(row=15, column=2)
 album_button = Button(window, text="Search", command=getAlbumQuery)
 album_button.grid(row=15, column=4)
 
-create_entry = Button(window, text="Add Entry", command=createEntry)
-create_entry.grid(row=18, column=2)
+collection_entry = Button(window, text="Add Selection to Collection", command=collectionEntry)
+collection_entry.grid(row=18, column=2)
+
 
 window.mainloop()
 
