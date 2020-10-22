@@ -116,7 +116,7 @@ def getArtistQuery():
                     artistName[i] = artistName[i].replace(" ", "")
                     artistName[i] = artistName[i].replace("\'", "")
                     i += 1
-            if (len(artistName) != 0):
+            if (len(artistName) > 0):
                 query = "SELECT \"firstName\", \"lastName\" from artist where \"firstName\" like '%" + artistName[0] + "%' AND \"lastName\" like '%" + artistName[1] + "%'"
             else:
                 query = "SELECT \"firstName\", \"lastName\" from artist where \"firstName\" like '%" + artist_var.get() + "%' or \"lastName\" like '%" + artist_var.get() + "%'"
@@ -265,30 +265,93 @@ def collectionEntry():
         cursor.execute(query)
         user_id = cursor.fetchall()
         if (user_id != ""):
-            print("in")
             if(song_var.get() != ""):
-                query = "SELECT DISTINCT id from song where title like '%" + song_var.get() + "%'"
-                cursor.execute(query)
-                ids = cursor.fetchall()
-                for song_id in ids:
-                    query = "SELECT collectionID from collection where \'" + str(song_id[0]) + "\' = id AND \'" + str(user_id[0][0]) + "\' = uid"
+                try:
+                    query = "SELECT DISTINCT id from song where title like '%" + song_var.get() + "%'"
                     cursor.execute(query)
-                    repeat = cursor.fetchall()
-                    if(len(repeat) == 0):
-                        pass
+                    ids = cursor.fetchall()
+                    for song_id in ids:
+                        query = "SELECT \"collectionID\" from collection where \'" + str(song_id[0]) + "\' = id AND \'" + str(user_id[0][0]) + "\' = uid"
+                        cursor.execute(query)
+                        repeat = cursor.fetchall()
+                        if(len(repeat) != 0):
+                            pass
+                        else:
+                            query = "INSERT INTO collection (id, uid) VALUES (\'" + str(song_id[0]) + "\', \'" + str(user_id[0][0]) + "\')"
+                            cursor.execute(query)
+                            connection.commit
+                            query = "SELECT \"collectionID\" from collection where \'" + str(song_id[0]) + "\' = id AND \'" + str(user_id[0][0]) + "\' = uid"
+                            cursor.execute(query)
+                            coll_ID = cursor.fetchall()
+                            query = "INSERT INTO \"songCollection\" (id, \"collectionID\") VALUES (\'" + str(song_id[0]) + "\', \'" + str(coll_ID[0][0]) + "\')"
+                            cursor.execute(query)
+                            connection.commit()
+                except:
+                    print("error adding to collection")
+
+            #ARTIST SECTION
+            if (artist_var.get() != ""):
+                artistName = []
+                try:
+                    if (artist_var.get()[0] == "("):
+                        artistName = artist_var.get()[1:len(artist_var.get()) - 1].split(',')
+                        i = 0
+                        while i < len(artistName):
+                            artistName[i] = artistName[i].replace(" ", "")
+                            artistName[i] = artistName[i].replace("\'", "")
+                            i += 1
+                    if (len(artistName) > 0):
+                        query = "SELECT \"artistID\" from artist where \"firstName\" like '%" + artistName[0] + "%' AND \"lastName\" like '%" + artistName[1] + "%'"
                     else:
-                        query = "INSERT INTO collection (id, uid) VALUES (\'" + str(song_id[0]) + "\', \'" + str(user_id[0][0]) + "\')"
-                        print(query)
-                        cursor.execute(query)
-                        query = "SELECT collectionID from collection where \'" + str(song_id[0]) + "\' = id AND \'" + str(user_id[0][0]) + "\' = uid"
-                        cursor.execute(query)
-                        coll_ID = cursor.fetchall()
-                        print(coll_ID)
+                        query = "SELECT \"artistID\" from artist where \"firstName\" like '%" + artist_var.get() + "%' or \"lastName\" like '%" + artist_var.get() + "%'"
 
-                        #query = "INSERT INTO songCollection"
-                connection.commit()
+                    cursor.execute(query)
+                    ids = cursor.fetchall()
+                    for artist_id in ids:
+                        query = "SELECT \"collectionID\" from collection where \'" + str(artist_id[0]) + "\' = \"artistID\" AND \'" + str(user_id[0][0]) + "\' = uid"
+                        cursor.execute(query)
+                        repeat = cursor.fetchall()
+                        if (len(repeat) != 0):
+                            pass
+                        else:
+                            query = "INSERT INTO collection (\"artistID\", uid) VALUES (\'" + str(artist_id[0]) + "\', \'" + str(user_id[0][0]) + "\')"
+                            cursor.execute(query)
+                            connection.commit
+                            query = "SELECT \"collectionID\" from collection where \'" + str(artist_id[0]) + "\' = \"artistID\" AND \'" + str(user_id[0][0]) + "\' = uid"
+                            cursor.execute(query)
+                            coll_ID = cursor.fetchall()
+                            query = "INSERT INTO \"artistCollection\" (\"artistID\", \"collectionID\") VALUES (\'" + str(artist_id[0]) + "\', \'" + str(coll_ID[0][0]) + "\')"
+                            cursor.execute(query)
+                            connection.commit()
+                except:
+                    print("error adding to collection")
 
-    return 1
+
+            # ALBUM SECTION
+            if (album_var.get() != ""):
+                try:
+                    query = "SELECT \"albumID\" from album where \"albumName\" like '%" + album_var.get() + "%'"
+                    cursor.execute(query)
+                    ids = cursor.fetchall()
+                    for album_id in ids:
+                        query = "SELECT \"collectionID\" from collection where \'" + str(album_id[0]) + "\' = \"albumID\" AND \'" + str(user_id[0][0]) + "\' = uid"
+                        cursor.execute(query)
+                        repeat = cursor.fetchall()
+                        if (len(repeat) != 0):
+                            pass
+                        else:
+                            query = "INSERT INTO collection (\"albumID\", uid) VALUES (\'" + str(album_id[0]) + "\', \'" + str(user_id[0][0]) + "\')"
+                            cursor.execute(query)
+                            connection.commit
+                            query = "SELECT \"collectionID\" from collection where \'" + str(album_id[0]) + "\' = \"albumID\" AND \'" + str(user_id[0][0]) + "\' = uid"
+                            cursor.execute(query)
+                            coll_ID = cursor.fetchall()
+                            query = "INSERT INTO \"albumCollection\" (\"albumID\", \"collectionID\") VALUES (\'" + str(album_id[0]) + "\', \'" + str(coll_ID[0][0]) + "\')"
+                            cursor.execute(query)
+                            connection.commit()
+                except:
+                    print("error adding to collection")
+
 
 
 window = Tk()
