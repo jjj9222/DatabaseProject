@@ -353,6 +353,12 @@ def collectionEntry():
                     print("error adding to collection")
 
 def update_collection():
+
+    # remove previous list being displayed
+    ca_listbox.delete(0, END)
+    cs_listbox.delete(0, END)
+    cal_listbox.delete(0, END)
+
     if(user_var.get() != ""):
         query = "SELECT DISTINCT uid from \"user\" where username = \'" + user_var.get() + "\'"
         cursor.execute(query)
@@ -375,7 +381,6 @@ def update_collection():
         data = cursor.fetchall()
         for row in data:
             cal_listbox.insert(END, row[0])
-
 
 
 window = Tk()
@@ -470,7 +475,6 @@ collection_entry.grid(row=18, column=2)
 
 display_button = Button(window, text="Display Collection", command=update_collection)
 display_button.grid(row=26, column=2)
-
 
 window.mainloop()
 connection.close()
