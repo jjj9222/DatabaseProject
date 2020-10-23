@@ -66,7 +66,7 @@ def getSongQuery():
                 cursor.execute(query)
                 data = cursor.fetchall()
                 for row in data:
-                    artist_listbox.insert(END, row[0])
+                    artist_listbox.insert(END, row)
         except:
             print("Error")
 
@@ -226,7 +226,7 @@ def getAlbumQuery():
                 cursor.execute(query)
                 data = cursor.fetchall()
                 for row in data:
-                    artist_listbox.insert(END, row[0])
+                    artist_listbox.insert(END, row)
         except:
             print("Error")
 
@@ -418,7 +418,7 @@ album_scoll.config(command=album_listbox.yview)
 cs_label = Label(window, text="Music Collection")
 cs_label.grid(row=20, column= 0)
 cs_scoll = Scrollbar(window)
-cs_scoll.grid(row=21, column=1, rowspan=10, sticky=N+S+W)
+cs_scoll.grid(row=21, column=1, rowspan=2, sticky=N+S+W)
 cs_listbox = Listbox(width=50, yscrollcommand=cs_scoll.set)
 # #collection_listbox.bind('<<ListboxSelect>>', curcollectionSelect)
 cs_listbox.grid(row=21, column=0)
@@ -427,7 +427,7 @@ cs_scoll.config(command=cs_listbox.yview)
 ca_label = Label(window, text="Artist Collection")
 ca_label.grid(row=20, column= 2)
 ca_scoll = Scrollbar(window)
-ca_scoll.grid(row=21, column=3, rowspan=10, sticky=N+S+W)
+ca_scoll.grid(row=21, column=3, rowspan=2, sticky=N+S+W)
 ca_listbox = Listbox(width=50, yscrollcommand=ca_scoll.set)
 # #collection_listbox.bind('<<ListboxSelect>>', curcollectionSelect)
 ca_listbox.grid(row=21, column=2)
@@ -436,7 +436,7 @@ ca_scoll.config(command=ca_listbox.yview)
 cal_label = Label(window, text="Album Collection")
 cal_label.grid(row=20, column= 4)
 cal_scoll = Scrollbar(window)
-cal_scoll.grid(row=21, column=5, rowspan=10, sticky=N+S+W)
+cal_scoll.grid(row=21, column=5, rowspan=2, sticky=N+S+W)
 cal_listbox = Listbox(width=50, yscrollcommand=cal_scoll.set)
 # #collection_listbox.bind('<<ListboxSelect>>', curcollectionSelect)
 cal_listbox.grid(row=21, column=4)
@@ -478,4 +478,3 @@ display_button.grid(row=26, column=2)
 
 window.mainloop()
 connection.close()
-
