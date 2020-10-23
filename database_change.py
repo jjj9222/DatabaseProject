@@ -279,15 +279,15 @@ def collectionEntry():
                         else:
                             query = "INSERT INTO collection (id, uid) VALUES (\'" + str(song_id[0]) + "\', \'" + str(user_id[0][0]) + "\')"
                             cursor.execute(query)
-                            connection.commit
+                            update_collection()
                             query = "SELECT \"collectionID\" from collection where \'" + str(song_id[0]) + "\' = id AND \'" + str(user_id[0][0]) + "\' = uid"
                             cursor.execute(query)
                             coll_ID = cursor.fetchall()
                             query = "INSERT INTO \"songCollection\" (id, \"collectionID\") VALUES (\'" + str(song_id[0]) + "\', \'" + str(coll_ID[0][0]) + "\')"
                             cursor.execute(query)
-                            connection.commit()
+                            update_collection()
                 except:
-                    print("error adding to collection")
+                    print("error adding to collection", query)
 
             #ARTIST SECTION
             if (artist_var.get() != ""):
@@ -316,13 +316,13 @@ def collectionEntry():
                         else:
                             query = "INSERT INTO collection (\"artistID\", uid) VALUES (\'" + str(artist_id[0]) + "\', \'" + str(user_id[0][0]) + "\')"
                             cursor.execute(query)
-                            connection.commit
+                            update_collection()
                             query = "SELECT \"collectionID\" from collection where \'" + str(artist_id[0]) + "\' = \"artistID\" AND \'" + str(user_id[0][0]) + "\' = uid"
                             cursor.execute(query)
                             coll_ID = cursor.fetchall()
                             query = "INSERT INTO \"artistCollection\" (\"artistID\", \"collectionID\") VALUES (\'" + str(artist_id[0]) + "\', \'" + str(coll_ID[0][0]) + "\')"
                             cursor.execute(query)
-                            connection.commit()
+                            update_collection()
                 except:
                     print("error adding to collection")
 
@@ -342,15 +342,39 @@ def collectionEntry():
                         else:
                             query = "INSERT INTO collection (\"albumID\", uid) VALUES (\'" + str(album_id[0]) + "\', \'" + str(user_id[0][0]) + "\')"
                             cursor.execute(query)
-                            connection.commit
+                            update_collection()
                             query = "SELECT \"collectionID\" from collection where \'" + str(album_id[0]) + "\' = \"albumID\" AND \'" + str(user_id[0][0]) + "\' = uid"
                             cursor.execute(query)
                             coll_ID = cursor.fetchall()
                             query = "INSERT INTO \"albumCollection\" (\"albumID\", \"collectionID\") VALUES (\'" + str(album_id[0]) + "\', \'" + str(coll_ID[0][0]) + "\')"
                             cursor.execute(query)
-                            connection.commit()
+                            update_collection()
                 except:
                     print("error adding to collection")
+
+def update_collection():
+    if(user_var.get() != ""):
+        query = "SELECT DISTINCT uid from \"user\" where username = \'" + user_var.get() + "\'"
+        cursor.execute(query)
+        user_id = str(cursor.fetchall()[0][0])
+        connection.commit()
+
+        #update song collection list
+        cursor.execute("SELECT DISTINCT S.title from song S, collection C where S.id = C.id AND C.uid = \'" + user_id + "\'")
+        data = cursor.fetchall()
+        for row in data:
+            cs_listbox.insert(END, row[0])
+
+        #update artist collection list
+        cursor.execute("SELECT DISTINCT A.\"firstName\", A.\"lastName\" from artist A, collection C where A.\"artistID\" = C.\"artistID\"AND C.uid = \'" + user_id + "\'")
+        data = cursor.fetchall()
+        for row in data:
+            ca_listbox.insert(END, row)
+
+        cursor.execute("SELECT DISTINCT A.\"albumName\" from album A, collection C where A.\"albumID\" = C.\"albumID\"AND C.uid = \'" + user_id + "\'")
+        data = cursor.fetchall()
+        for row in data:
+            cal_listbox.insert(END, row[0])
 
 
 
@@ -404,7 +428,7 @@ ca_listbox = Listbox(width=50, yscrollcommand=ca_scoll.set)
 ca_listbox.grid(row=21, column=2)
 ca_scoll.config(command=ca_listbox.yview)
 
-cal_label = Label(window, text="Artist Collection")
+cal_label = Label(window, text="Album Collection")
 cal_label.grid(row=20, column= 4)
 cal_scoll = Scrollbar(window)
 cal_scoll.grid(row=21, column=5, rowspan=10, sticky=N+S+W)
@@ -444,6 +468,10 @@ album_button.grid(row=15, column=4)
 collection_entry = Button(window, text="Add Selection to Collection", command=collectionEntry)
 collection_entry.grid(row=18, column=2)
 
+display_button = Button(window, text="Display Collection", command=update_collection)
+display_button.grid(row=26, column=2)
+
 
 window.mainloop()
+connection.close()
 
