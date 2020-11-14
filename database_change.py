@@ -1,5 +1,7 @@
 import psycopg2
 from tkinter import *
+import time
+import datetime
 
 hostname = 'reddwarf.cs.rit.edu'
 username = 'p320_02'
@@ -256,6 +258,14 @@ def curAlbumSelect(event):
     except:
         pass
 
+def curCollectionSelect(event):
+    widget = event.widget
+    cursor_select = widget.curselection()
+    try:
+        cur_song_var.set(widget.get(cursor_select[0]))
+    except:
+        pass
+
 
 def collectionEntry():
 
@@ -382,6 +392,28 @@ def update_collection():
         for row in data:
             cal_listbox.insert(END, row[0])
 
+def play_song():
+
+#try:
+    #When the button is pressed we want to update the play count and the listen_to table
+    query = "SELECT DISTINCT uid from \"user\" where username = \'" + user_var.get() + "\'"
+    cursor.execute(query)
+    user_id = str(cursor.fetchall()[0][0])
+
+    query = "SELECT DISTINCT id from song where title like '%" + cur_song_var.get() + "%'"
+    cursor.execute(query)
+    id = cursor.fetchall()[0][0]
+
+    #have the ID and uID need the timestamp
+    ts = time.time()
+    timestamp = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+    query = "INSERT INTO listens_to (id, \"timestamp\", uid) VALUES (\'" + str(id) + "\', \'" + str(timestamp) + "\', \'" + str(user_id) + "\')"
+    cursor.execute(query)
+    update_collection()
+#except:
+    print("ERROR")
+    #pass
+
 
 window = Tk()
 window.title("Music Player")
@@ -420,7 +452,7 @@ cs_label.grid(row=20, column= 0)
 cs_scoll = Scrollbar(window)
 cs_scoll.grid(row=21, column=1, rowspan=2, sticky=N+S+W)
 cs_listbox = Listbox(width=50, yscrollcommand=cs_scoll.set)
-# #collection_listbox.bind('<<ListboxSelect>>', curcollectionSelect)
+cs_listbox.bind('<<ListboxSelect>>', curCollectionSelect)
 cs_listbox.grid(row=21, column=0)
 cs_scoll.config(command=cs_listbox.yview)
 
@@ -446,6 +478,7 @@ song_var = StringVar()
 artist_var = StringVar()
 album_var = StringVar()
 user_var = StringVar()
+cur_song_var = StringVar()
 
 song_entry = Entry(window, textvariable=song_var)
 song_entry.grid(row=10)
@@ -475,6 +508,15 @@ collection_entry.grid(row=18, column=2)
 
 display_button = Button(window, text="Display Collection", command=update_collection)
 display_button.grid(row=26, column=2)
+
+play_button = Button(window, text="Play Selected Song", command=play_song)
+play_button.grid(row=26, column=0)
+
+format_text = Label(window, text="Selected Song Below")
+format_text.grid(row=24, column=0)
+play_label = Label(window, textvariable=cur_song_var)
+play_label.grid(row=25, column=0)
+
 
 window.mainloop()
 connection.close()
