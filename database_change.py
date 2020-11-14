@@ -362,6 +362,17 @@ def collectionEntry():
                 except:
                     print("error adding to collection")
 
+def most_frequent(List):
+    counter = 0
+    num = List[0]
+
+    for i in List:
+        frequency = List.count(i)
+        if(frequency > counter):
+            counter = frequency
+            num = i
+    return num
+
 def update_collection():
 
     # remove previous list being displayed
@@ -392,27 +403,44 @@ def update_collection():
         for row in data:
             cal_listbox.insert(END, row[0])
 
+        cursor.execute("SELECT id from listens_to where uid = \'" + user_id + "\'")
+        data = cursor.fetchall()
+
+        #This is the fav song id
+        fav_song_id = most_frequent(data)[0]
+        print(fav_song_id)
+
+        cursor.execute("SELECT A.\"genre\" from song S, album A, contains C  where C.id = \'" + str(fav_song_id) + "\' AND C.\"albumID\" = A.\"albumID\"")
+        data = cursor.fetchall()
+
+        fav_genre = data
+        print(fav_genre[0][0])
+        cursor.execute("SELECT S.title from song S, album A, contains C where C.id = S.id AND C.\"albumID\" = A.\"albumID\" AND A.\"genre\" = \'" + fav_genre[0][0] + "\' ORDER BY S.\"playCount\" DESC LIMIT 10")
+        data = cursor.fetchall()
+
+        for item in data:
+            rec_listbox.insert(END, item[0])
+
+
 def play_song():
+    try:
+        #When the button is pressed we want to update the play count and the listen_to table
+        query = "SELECT DISTINCT uid from \"user\" where username = \'" + user_var.get() + "\'"
+        cursor.execute(query)
+        user_id = str(cursor.fetchall()[0][0])
 
-#try:
-    #When the button is pressed we want to update the play count and the listen_to table
-    query = "SELECT DISTINCT uid from \"user\" where username = \'" + user_var.get() + "\'"
-    cursor.execute(query)
-    user_id = str(cursor.fetchall()[0][0])
+        query = "SELECT DISTINCT id from song where title like '%" + cur_song_var.get() + "%'"
+        cursor.execute(query)
+        id = cursor.fetchall()[0][0]
 
-    query = "SELECT DISTINCT id from song where title like '%" + cur_song_var.get() + "%'"
-    cursor.execute(query)
-    id = cursor.fetchall()[0][0]
-
-    #have the ID and uID need the timestamp
-    ts = time.time()
-    timestamp = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
-    query = "INSERT INTO listens_to (id, \"timestamp\", uid) VALUES (\'" + str(id) + "\', \'" + str(timestamp) + "\', \'" + str(user_id) + "\')"
-    cursor.execute(query)
-    update_collection()
-#except:
-    print("ERROR")
-    #pass
+        #have the ID and uID need the timestamp
+        ts = time.time()
+        timestamp = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+        query = "INSERT INTO listens_to (id, \"timestamp\", uid) VALUES (\'" + str(id) + "\', \'" + str(timestamp) + "\', \'" + str(user_id) + "\')"
+        cursor.execute(query)
+        update_collection()
+    except:
+        pass
 
 
 window = Tk()
@@ -474,6 +502,13 @@ cal_listbox = Listbox(width=50, yscrollcommand=cal_scoll.set)
 cal_listbox.grid(row=21, column=4)
 cal_scoll.config(command=cal_listbox.yview)
 
+rec_label = Label(window, text="Top 10 Recommended Songs Based")
+rec_label.grid(row=27, column= 4)
+rec_label = Label(window, text="On Your Favorite Generes")
+rec_label.grid(row=28, column= 4)
+rec_listbox = Listbox(width=50)
+rec_listbox.grid(row=29, column=4)
+
 song_var = StringVar()
 artist_var = StringVar()
 album_var = StringVar()
@@ -516,6 +551,8 @@ format_text = Label(window, text="Selected Song Below")
 format_text.grid(row=24, column=0)
 play_label = Label(window, textvariable=cur_song_var)
 play_label.grid(row=25, column=0)
+
+
 
 
 window.mainloop()
