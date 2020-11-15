@@ -373,6 +373,23 @@ def most_frequent(List):
             num = i
     return num
 
+def findMostSong():
+    #find the date today
+    today = datetime.datetime.today()
+    format_Today = today.strftime('%Y-%m-%d')
+
+    query = "SELECT id from listens_to where \"timestamp\" like \'%" + format_Today + "%\'"
+    cursor.execute(query)
+    data = cursor.fetchall()
+
+    fav_song = most_frequent(data)[0]
+    #have the most popular song for the day
+    query = "SELECT title from song where id = \'" + str(fav_song) + "\'"
+    cursor.execute(query)
+    data = cursor.fetchall()
+    most_song.set(data[0][0])
+
+
 def update_collection():
 
     # remove previous list being displayed
@@ -421,9 +438,11 @@ def update_collection():
         for item in data:
             rec_listbox.insert(END, item[0])
 
+        findMostSong()
+
 
 def play_song():
-    #try:
+    try:
         #When the button is pressed we want to update the play count and the listen_to table
         query = "SELECT DISTINCT uid from \"user\" where username = \'" + user_var.get() + "\'"
         cursor.execute(query)
@@ -446,8 +465,8 @@ def play_song():
         query = "UPDATE song SET \"playCount\" = \'" + str(playcount + 1) + "\' where id = \'" + str(id) + "\'"
         cursor.execute(query)
         update_collection()
-    #except:
-        #pass
+    except:
+        pass
 
 
 window = Tk()
@@ -515,12 +534,14 @@ rec_label = Label(window, text="On Your Favorite Generes")
 rec_label.grid(row=28, column= 4)
 rec_listbox = Listbox(width=50)
 rec_listbox.grid(row=29, column=4)
+rec_listbox.bind('<<ListboxSelect>>', curSongSelect)
 
 song_var = StringVar()
 artist_var = StringVar()
 album_var = StringVar()
 user_var = StringVar()
 cur_song_var = StringVar()
+most_song = StringVar()
 
 song_entry = Entry(window, textvariable=song_var)
 song_entry.grid(row=10)
@@ -558,6 +579,12 @@ format_text = Label(window, text="Selected Song Below")
 format_text.grid(row=24, column=0)
 play_label = Label(window, textvariable=cur_song_var)
 play_label.grid(row=25, column=0)
+
+format_text = Label(window, text="Most Played Song Today")
+format_text.grid(row=27, column=2)
+
+play_label = Label(window, textvariable=most_song)
+play_label.grid(row=28, column=2)
 
 
 
