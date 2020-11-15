@@ -423,7 +423,7 @@ def update_collection():
 
 
 def play_song():
-    try:
+    #try:
         #When the button is pressed we want to update the play count and the listen_to table
         query = "SELECT DISTINCT uid from \"user\" where username = \'" + user_var.get() + "\'"
         cursor.execute(query)
@@ -438,9 +438,16 @@ def play_song():
         timestamp = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
         query = "INSERT INTO listens_to (id, \"timestamp\", uid) VALUES (\'" + str(id) + "\', \'" + str(timestamp) + "\', \'" + str(user_id) + "\')"
         cursor.execute(query)
+
+        query = "SELECT \"playCount\" from song where id = \'" + str(id) + "\'"
+        cursor.execute(query)
+        playcount = cursor.fetchall()[0][0]
+
+        query = "UPDATE song SET \"playCount\" = \'" + str(playcount + 1) + "\' where id = \'" + str(id) + "\'"
+        cursor.execute(query)
         update_collection()
-    except:
-        pass
+    #except:
+        #pass
 
 
 window = Tk()
