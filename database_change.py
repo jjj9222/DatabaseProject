@@ -2,6 +2,8 @@ import psycopg2
 from tkinter import *
 import time
 import datetime
+import pandas as pd
+import os
 
 hostname = 'reddwarf.cs.rit.edu'
 username = 'p320_02'
@@ -440,6 +442,34 @@ def update_collection():
 
         findMostSong()
 
+def exportData():
+    if(song_var.get() != ""):
+        query = "SELECT id from song where title = \'" + str(song_var.get()) + "\'"
+        cursor.execute(query)
+        id = cursor.fetchall()[0][0]
+        query = "SELECT L.\"timestamp\", S.\"playCount\", U.username from song S, listens_to L, \"user\" U where S.id = L.id AND U.uid = L.uid"
+        cursor.execute(query)
+        data = cursor.fetchall()
+        formatCSV = {}
+
+        temp = []
+        for row in data:
+            temp.append(row[0])
+        formatCSV["timeStamp"] = temp
+
+        temp = []
+        for row in data:
+            temp.append(row[1])
+        formatCSV["playCount"] = temp
+
+        temp = []
+        for row in data:
+            temp.append(row[2])
+        formatCSV["userName"] = temp
+
+        df = pd.DataFrame(formatCSV, columns=['timeStamp', 'playCount', 'userName'])
+        export_path = os.getcwd() + "\\test.csv"
+        df.to_csv(export_path, index=False, header=True)
 
 def play_song():
     try:
@@ -585,6 +615,9 @@ format_text.grid(row=27, column=2)
 
 play_label = Label(window, textvariable=most_song)
 play_label.grid(row=28, column=2)
+
+export_button = Button(window, text="Export Song Data to CSV", command=exportData)
+export_button.grid(row=30, column=0)
 
 
 
