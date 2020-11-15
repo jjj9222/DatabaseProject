@@ -4,6 +4,7 @@ import time
 import datetime
 import pandas as pd
 import os
+from collection import *
 
 hostname = 'reddwarf.cs.rit.edu'
 username = 'p320_02'
@@ -15,6 +16,9 @@ connection = psycopg2.connect(host=hostname, user=username, password=password, d
 
 # Cursor for the database
 cursor = connection.cursor()
+
+# run collection csv export
+countSongCollection(cursor)
 
 def getSongQuery():
     # Deletes the info in the listbox on press of button
