@@ -1,5 +1,4 @@
 import csv
-
 import datetime
 
 
@@ -8,7 +7,7 @@ def countSongCollection(cursor):
     query = "SELECT s.id, r.title, count(s.id) as count " \
             "from \"songCollection\" s, song r " \
             "where s.id = r.id group by s.id, r.title " \
-            "order by count desc"
+            "order by count desc LIMIT 10"
     cursor.execute(query)
     data = cursor.fetchall()
 
@@ -17,12 +16,8 @@ def countSongCollection(cursor):
         song_writer = csv.DictWriter(song_file, fieldnames=fields)
         song_writer.writeheader()
 
-        count = 0
         for row in data:
-            if count == 10:
-                break
             song_writer.writerow({fields[0]: row[0], fields[1]: row[1], fields[2]: row[2]})
-            count += 1
 
 
 def averageUserTime(cursor):
