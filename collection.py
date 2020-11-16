@@ -1,6 +1,7 @@
 import csv
-import time
+
 import datetime
+
 
 def countSongCollection(cursor):
     # finds the most popularly added songs
@@ -10,7 +11,6 @@ def countSongCollection(cursor):
             "order by count desc"
     cursor.execute(query)
     data = cursor.fetchall()
-    print(data)
 
     with open('collection_song.csv', mode='w') as song_file:
         fields = ['id', 'title', 'count']
@@ -56,3 +56,5 @@ def averageUserTime(cursor):
         val = dictWeek[key]/420
         ct += 1
         avg += val
+
+    print("Users spend an average of %d minute(s) per day" % (avg/ct))
