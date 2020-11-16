@@ -4,6 +4,7 @@ import time
 import datetime
 import pandas as pd
 import os
+from collection import *
 
 hostname = 'reddwarf.cs.rit.edu'
 username = 'p320_02'
@@ -655,7 +656,12 @@ export_button = Button(window, text="Export Song Data to CSV", command=exportDat
 export_button.grid(row=32, column=0)
 
 
-
-
 window.mainloop()
+
+# run other analysis
+# top 10 songs commonly added to collections
+countSongCollection(cursor)
+# average daily user time
+averageUserTime(cursor)
+
 connection.close()
