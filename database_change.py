@@ -4,6 +4,7 @@ import time
 import datetime
 import pandas as pd
 import os
+from collection import *
 
 hostname = 'reddwarf.cs.rit.edu'
 username = 'p320_02'
@@ -15,6 +16,7 @@ connection = psycopg2.connect(host=hostname, user=username, password=password, d
 
 # Cursor for the database
 cursor = connection.cursor()
+
 
 def getSongQuery():
     # Deletes the info in the listbox on press of button
@@ -376,23 +378,20 @@ def most_frequent(List):
     return num
 
 def findMostSong():
-    try:
-        #find the date today
-        today = datetime.datetime.today()
-        format_Today = today.strftime('%Y-%m-%d')
+    #find the date today
+    today = datetime.datetime.today()
+    format_Today = today.strftime('%Y-%m-%d')
 
-        query = "SELECT id from listens_to where \"timestamp\" like \'%" + format_Today + "%\'"
-        cursor.execute(query)
-        data = cursor.fetchall()
+    query = "SELECT id from listens_to where \"timestamp\" like \'%" + format_Today + "%\'"
+    cursor.execute(query)
+    data = cursor.fetchall()
 
-        fav_song = most_frequent(data)[0]
-        #have the most popular song for the day
-        query = "SELECT title from song where id = \'" + str(fav_song) + "\'"
-        cursor.execute(query)
-        data = cursor.fetchall()
-        most_song.set(data[0][0])
-    except:
-        pass
+    fav_song = most_frequent(data)[0]
+    #have the most popular song for the day
+    query = "SELECT title from song where id = \'" + str(fav_song) + "\'"
+    cursor.execute(query)
+    data = cursor.fetchall()
+    most_song.set(data[0][0])
 
 
 def update_collection():
@@ -401,7 +400,6 @@ def update_collection():
     ca_listbox.delete(0, END)
     cs_listbox.delete(0, END)
     cal_listbox.delete(0, END)
-    rec_listbox.delete(0, END)
 
     if(user_var.get() != ""):
         query = "SELECT DISTINCT uid from \"user\" where username = \'" + user_var.get() + "\'"
@@ -431,33 +429,18 @@ def update_collection():
 
         #This is the fav song id
         fav_song_id = most_frequent(data)[0]
+        print(fav_song_id)
 
         cursor.execute("SELECT A.\"genre\" from song S, album A, contains C  where C.id = \'" + str(fav_song_id) + "\' AND C.\"albumID\" = A.\"albumID\"")
         data = cursor.fetchall()
 
         fav_genre = data
-        cursor.execute("SELECT S.title, S.id from song S, album A, contains C where C.id = S.id AND C.\"albumID\" = A.\"albumID\" AND A.\"genre\" = \'" + fav_genre[0][0] + "\' ORDER BY S.\"playCount\" DESC LIMIT 10")
+        print(fav_genre[0][0])
+        cursor.execute("SELECT S.title from song S, album A, contains C where C.id = S.id AND C.\"albumID\" = A.\"albumID\" AND A.\"genre\" = \'" + fav_genre[0][0] + "\' ORDER BY S.\"playCount\" DESC LIMIT 10")
         data = cursor.fetchall()
-
-        song_data = data
 
         for item in data:
             rec_listbox.insert(END, item[0])
-
-        query = "SELECT DISTINCT T.\"firstName\", T.\"lastName\" from album A, artist T, produced O where A.\"genre\" = \'" + fav_genre[0][0] + "\' AND O.\"artistID\" = T.\"artistID\" AND O.\"albumID\" = A.\"albumID\" LIMIT 10"
-        cursor.execute(query)
-        data = cursor.fetchall()
-
-        for item in data:
-            rec1_listbox.insert(END, item)
-
-        for info in song_data:
-            query = "SELECT DISTINCT A.\"albumName\" from song S, album A, contains C where A.\"genre\" = \'" + fav_genre[0][0] + "\' AND A.\"albumID\" = C.\"albumID\" AND C.id = \'" + str(info[1]) + "\' LIMIT 10"
-            cursor.execute(query)
-            data = cursor.fetchall()
-
-            for item in data:
-                rec2_listbox.insert(END, item[0])
 
         findMostSong()
 
@@ -520,7 +503,7 @@ def play_song():
 
 window = Tk()
 window.title("Music Player")
-window.geometry("1000x850")
+window.geometry("1000x750")
 
 #Getting Song Browser Setup
 song_label = Label(window, text="Song Name")
@@ -578,28 +561,12 @@ cal_listbox.grid(row=21, column=4)
 cal_scoll.config(command=cal_listbox.yview)
 
 rec_label = Label(window, text="Top 10 Recommended Songs Based")
-rec_label.grid(row=29, column= 0)
-rec_label = Label(window, text="On Your Favorite Genre")
-rec_label.grid(row=30, column= 0)
+rec_label.grid(row=27, column= 4)
+rec_label = Label(window, text="On Your Favorite Generes")
+rec_label.grid(row=28, column= 4)
 rec_listbox = Listbox(width=50)
-rec_listbox.grid(row=31, column=0)
+rec_listbox.grid(row=29, column=4)
 rec_listbox.bind('<<ListboxSelect>>', curSongSelect)
-
-rec1_label = Label(window, text="Top 10 Recommended Artist Based")
-rec1_label.grid(row=29, column= 2)
-rec1_label = Label(window, text="On Your Favorite Songs and Genre")
-rec1_label.grid(row=30, column= 2)
-rec1_listbox = Listbox(width=50)
-rec1_listbox.grid(row=31, column=2)
-rec1_listbox.bind('<<ListboxSelect>>', curArtistSelect)
-
-rec2_label = Label(window, text="Top 10 Recommended Albums Based")
-rec2_label.grid(row=29, column= 4)
-rec2_label = Label(window, text="On Your Favorite Songs and Genre")
-rec2_label.grid(row=30, column= 4)
-rec2_listbox = Listbox(width=50)
-rec2_listbox.grid(row=31, column=4)
-rec2_listbox.bind('<<ListboxSelect>>', curAlbumSelect)
 
 song_var = StringVar()
 artist_var = StringVar()
@@ -652,10 +619,13 @@ play_label = Label(window, textvariable=most_song)
 play_label.grid(row=28, column=2)
 
 export_button = Button(window, text="Export Song Data to CSV", command=exportData)
-export_button.grid(row=32, column=0)
-
-
-
+export_button.grid(row=30, column=0)
 
 window.mainloop()
+
+# run collection csv export
+countSongCollection(cursor)
+# find average user time
+averageUserTime(cursor)
+
 connection.close()
