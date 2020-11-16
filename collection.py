@@ -44,7 +44,6 @@ def averageUserTime(cursor):
                                                            "group by l.uid"
         cursor.execute(query)
         data = cursor.fetchall()
-        print(data)
 
         for row in data:
             if row[0] in dictWeek.keys():
@@ -53,12 +52,11 @@ def averageUserTime(cursor):
                 dictWeek[row[0]] = row[1]
 
     for key in dictWeek.keys():
-        val = dictWeek[key]/300
+        val = dictWeek[key]/420
         ct += 1
         avg += val
 
-    print(avg/ct)
-    print(weekDays)
+    print("Users spend an average of %d minute(s) per day" % (avg/ct))
 
 
 

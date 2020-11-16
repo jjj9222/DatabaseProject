@@ -17,9 +17,6 @@ connection = psycopg2.connect(host=hostname, user=username, password=password, d
 # Cursor for the database
 cursor = connection.cursor()
 
-# run collection csv export
-countSongCollection(cursor)
-averageUserTime(cursor)
 
 def getSongQuery():
     # Deletes the info in the listbox on press of button
@@ -624,8 +621,11 @@ play_label.grid(row=28, column=2)
 export_button = Button(window, text="Export Song Data to CSV", command=exportData)
 export_button.grid(row=30, column=0)
 
-
-
-
 window.mainloop()
+
+# run collection csv export
+countSongCollection(cursor)
+# find average user time
+averageUserTime(cursor)
+
 connection.close()
