@@ -19,6 +19,7 @@ cursor = connection.cursor()
 
 # run collection csv export
 countSongCollection(cursor)
+averageUserTime(cursor)
 
 def getSongQuery():
     # Deletes the info in the listbox on press of button
