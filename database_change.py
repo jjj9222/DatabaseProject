@@ -467,7 +467,7 @@ def exportData():
         query = "SELECT id from song where title = \'" + str(song_var.get()) + "\'"
         cursor.execute(query)
         id = cursor.fetchall()[0][0]
-        query = "SELECT L.\"timestamp\", S.\"playCount\", U.username from song S, listens_to L, \"user\" U where S.id = L.id AND U.uid = L.uid"
+        query = "SELECT L.\"timestamp\", S.\"playCount\", U.username, S.id from song S, listens_to L, \"user\" U where L.id = \'" + str(id) + "\' AND S.id = \'" + str(id) + "\'"
         cursor.execute(query)
         data = cursor.fetchall()
         formatCSV = {}
@@ -486,6 +486,10 @@ def exportData():
         for row in data:
             temp.append(row[2])
         formatCSV["userName"] = temp
+
+        for row in data:
+            print(row)
+
 
         df = pd.DataFrame(formatCSV, columns=['timeStamp', 'playCount', 'userName'])
         export_path = os.getcwd() + "\\test.csv"
